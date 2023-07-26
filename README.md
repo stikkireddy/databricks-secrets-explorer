@@ -3,12 +3,5 @@
 
 ## Installation
 
-```python
-%pip install pip install git+https://github.com/stikkireddy/databricks-ui-extras.git@main
-```
-
-```python
-from databricks_ui_extras.app import RootApp
-
-RootApp()
-```
+Upload `https://raw.githubusercontent.com/stikkireddy/databricks-ui-extras/main/notebooks/databricks_ui_utility.py`
+as a notebook and run the cells.

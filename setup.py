@@ -1,15 +1,11 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='databricks-secrets-explorer',
+    name='databricks-ui-extras',
     author='Sri Tikkireddy',
     author_email='sri.tikkireddy@databricks.com',
-    description='A package for a ui to manipulate secrets',
-    packages=find_packages(exclude=['tests']),
-    package_data={'': ['infinite_loop_notebook.template']},
+    description='A package for a ui to do misc stuff in databricks',
     use_scm_version={
-        "root": "..",
-        "relative_to": __file__,
         "local_scheme": "node-and-timestamp"
     },
     setup_requires=['setuptools_scm'],

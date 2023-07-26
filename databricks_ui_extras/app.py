@@ -8,7 +8,7 @@ from databricks.sdk import WorkspaceClient
 from databricks.sdk.service.workspace import ScopeBackendType
 from solara.lab.toestand import Reactive
 
-import databricks_secrets_explorer
+import databricks_ui_extras
 
 ws_client = WorkspaceClient(profile=os.environ.get("DATABRICKS_CONFIG_PROFILE", None))
 
@@ -305,21 +305,20 @@ def SecretsBrowser():
                         solara.Button(icon_name="mdi-delete", icon=True, on_click=on_delete_secret)
 
 
-EXECUTION_BASE_PATH = Path("/Users/sri.tikkireddy").resolve()
-
-
 # Path("/Users/sri.tikkireddy/PycharmProjects/databricks-secrets-explorer").resolve()
 # Path("/Users/sri.tikkireddy/PycharmProjects/databricks-secrets-explorer").resolve()
 
 
 @solara.component
-def file_browser():
+def FileBrowser(exec_base_path, exclude_prefixes: List[str] = None):
     file, set_file = solara.use_state(cast(Optional[Path], None))
     path, set_path = solara.use_state(cast(Optional[Path], None))
     # directory, set_directory = solara.use_state(EXECUTION_BASE_PATH)
+    EXECUTION_BASE_PATH = Path(exec_base_path).resolve()
     directory = solara.use_reactive(EXECUTION_BASE_PATH)
     message = solara.use_reactive(None)
     MAX_FILE_CT = 10000
+    exclude_prefixes = exclude_prefixes or []
 
     with solara.Column():
         # can_select = solara.ui_checkbox("Enable select")
@@ -328,8 +327,11 @@ def file_browser():
         #     set_path(None)
         #     set_file(None)
 
-        # def filter_path(p: Path) -> bool:
-        #     return p.is_dir()
+        def filter_path(p: Path) -> bool:
+            if any([str(p).startswith(prefix) for prefix in exclude_prefixes]):
+                return False
+            return True
+            # return p.is_dir()
 
         # reset path and file when can_select changes
         # solara.use_memo(reset_path)
@@ -408,29 +410,44 @@ def file_browser():
 
         solara.FileBrowser(
             directory,
-            # filter=filter_path,
-            # on_directory_change=on_directory_change,
+            filter=filter_path,
             on_path_select=on_path_select,
             on_file_open=set_file,
             can_select=True,
         ).key("file-browser")
-        # solara.Info(f"You are in directory: {directory}")
-        # solara.Info(f"You selected path: {path}")
-        # solara.Info(f"You opened file: {file}")
 
 
 @solara.component
-def Page():
+def RootApp():
     with solara.AppBar():
         with solara.AppBarTitle():
-            solara.Text(f"Databricks Secrets Explorer: v{databricks_secrets_explorer.__version__}")
+            solara.Text(f"Databricks UI Extras: v{databricks_ui_extras.__version__}")
         me = ws_client.current_user.me()
-        solara.Text(f"{me.name.given_name} {me.name.family_name}", style="margin-right: 20px")
-    with solara.Card("Workspace Info", style="min-width: 500px"):
-        solara.Text("Workspace URL: " + ws_client.config.host)
-    SecretsBrowser()
-    with solara.Card("DBFS File Browser (Double click to navigate)"):
-        file_browser()
+        solara.Text(f"{me.display_name}", style="margin-right: 20px")
+
+    with solara.lab.Tabs():
+        with solara.lab.Tab("Workspace Details"):
+            with solara.Card("Workspace Info", style="min-width: 500px"):
+                solara.Text("Workspace URL: " + ws_client.config.host)
+        with solara.lab.Tab("Secrets Manager"):
+            SecretsBrowser()
+
+        with solara.lab.Tab("File Exporters"):
+            with solara.Card("File Exporters"):
+                with solara.lab.Tabs():
+                    if os.path.exists("/dbfs"):
+                        with solara.lab.Tab("DBFS Root"):
+                            with solara.Card("DBFS File Browser (Double click to navigate)"):
+                                FileBrowser("/dbfs", )
+                        with solara.lab.Tab("FileStore "):
+                            with solara.Card("FileStore File Browser (Double click to navigate)"):
+                                FileBrowser("/dbfs/FileStore")
+                    with solara.lab.Tab("Driver Root"):
+                        with solara.Card("Driver File Browser (Double click to navigate)"):
+                            FileBrowser("/", exclude_prefixes=["/dbfs"])
+                    with solara.lab.Tab("Driver User Home"):
+                        with solara.Card("Driver User Home File Browser (Double click to navigate)"):
+                            FileBrowser(os.path.expanduser("~/"))
 
 
-Page()
+RootApp()

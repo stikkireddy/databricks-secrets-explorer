@@ -4,7 +4,7 @@
 ## Installation
 
 ```python
-%pip install pip install git+https://github.com/stikkireddy/databricks-ui-extras.git@master
+%pip install pip install git+https://github.com/stikkireddy/databricks-ui-extras.git@main
 ```
 
 ```python

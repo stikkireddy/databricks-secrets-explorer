@@ -261,49 +261,54 @@ def SecretsBrowser():
                 solara.Button(f"Delete Scope: {selected_scope.value}", on_click=on_delete_scope)
 
         if selected_scope.value is not None and selected_scope.value != "":
+
             with solara.Column():
                 solara.Button("Create Secret", on_click=lambda: set_create_secret(True))
-                for secret in selected_secrets.value:
-                    def on_edit_secret(this_key=secret):
-                        print("selected for edit", this_key[0])
-                        selected_secret_key.value = this_key[0]
-                        set_edit_secret(True)
 
-                    def on_delete_secret(this_key=secret):
-                        delete_prompt_asset_type.value = "secret"
-                        delete_prompt_asset_name.value = this_key[0]
-                        delete_prompt_asset_id.value = this_key[0]
-                        set_show_delete_secret_prompt(True)
+                def on_delete_callback():
+                    try:
+                        print("Delete attempt: ", delete_prompt_asset_type.value, delete_prompt_asset_name.value)
+                        ws_client.secrets.delete_secret(scope=selected_scope.value,
+                                                        key=delete_prompt_asset_id.value)
+                        print("Delete success: ", delete_prompt_asset_type.value, delete_prompt_asset_name.value)
+                        reset_delete_prompt()
+                        selected_secrets.value = get_all_secrets(selected_scope.value)
+                    except Exception as e:
+                        print("Delete failed: ", delete_prompt_asset_type.value, delete_prompt_asset_name.value)
+                        print(e)
 
-                    def on_delete_callback():
-                        try:
-                            print("Delete attempt: ", delete_prompt_asset_type.value, delete_prompt_asset_name.value)
-                            ws_client.secrets.delete_secret(scope=selected_scope.value,
-                                                            key=delete_prompt_asset_id.value)
-                            print("Delete success: ", delete_prompt_asset_type.value, delete_prompt_asset_name.value)
-                            reset_delete_prompt()
-                            selected_secrets.value = get_all_secrets(selected_scope.value)
-                        except Exception as e:
-                            print("Delete failed: ", delete_prompt_asset_type.value, delete_prompt_asset_name.value)
-                            print(e)
+                with v.Dialog(v_model=show_delete_secret_prompt.value, persistent=True, max_width="600px",
+                              on_v_model=set_show_delete_secret_prompt):
+                    if show_delete_secret_prompt.value is True:
+                        PromptDelete(
+                            title=f"Delete Secret: {delete_prompt_asset_name.value} "
+                                  f"from Scope: {selected_scope.value}",
+                            warning_msg="Are you sure you want to delete this secret?",
+                            callback=on_delete_callback,
+                            show_dialog=set_show_delete_secret_prompt
+                        )
 
-                    with v.Dialog(v_model=show_delete_secret_prompt.value, persistent=True, max_width="600px",
-                                  on_v_model=set_show_delete_secret_prompt):
-                        if show_delete_secret_prompt.value is True:
-                            PromptDelete(
-                                title=f"Delete Secret: {delete_prompt_asset_name.value} "
-                                      f"from Scope: {selected_scope.value}",
-                                warning_msg="Are you sure you want to delete this secret?",
-                                callback=on_delete_callback,
-                                show_dialog=set_show_delete_secret_prompt
-                            )
+            for secret in selected_secrets.value:
+                with solara.Row(justify="start",style="align-items: center;"):
+                    with solara.Columns([1, 1, 4, 0, 0],style="align-items: center;"):
+                        def on_edit_secret(this_key=secret):
+                            print("selected for edit", this_key[0])
+                            selected_secret_key.value = this_key[0]
+                            set_edit_secret(True)
 
-                    with solara.Row(style="align-items: center;"):
-                        solara.Markdown(f"##### **Secret Key:** {secret[0]}", style="padding: inherit;")
-                        solara.Markdown(f"##### **Updated Timestamp:** {secret[1]}", style="padding: inherit;")
+                        def on_delete_secret(this_key=secret):
+                            delete_prompt_asset_type.value = "secret"
+                            delete_prompt_asset_name.value = this_key[0]
+                            delete_prompt_asset_id.value = this_key[0]
+                            set_show_delete_secret_prompt(True)
+
+                        # with solara.Row(style="align-items: center;", justify="space-evenly"):
+                        solara.Markdown(f"##### **Secret Key:** \n{secret[0]}", style="padding: inherit;")
+                        solara.Markdown(f"##### **Updated Timestamp:** \n{secret[1]}", style="padding: inherit;")
                         code_block = f'''
                         ```python
-                        secret_value = dbutils.secrets.get(scope="{selected_scope.value}", key="{secret[0]}")
+                        secret_value = dbutils.secrets.get(scope="{selected_scope.value}", 
+                            key="{secret[0]}")
                         ```'''
                         solara.Markdown(code_block)
                         solara.Button(icon_name="mdi-pencil", icon=True, on_click=on_edit_secret)

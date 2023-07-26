@@ -301,12 +301,13 @@ def SecretsBrowser():
                     with solara.Row(style="align-items: center;"):
                         solara.Markdown(f"##### **Secret Key:** {secret[0]}", style="padding: inherit;")
                         solara.Markdown(f"##### **Updated Timestamp:** {secret[1]}", style="padding: inherit;")
+                        code_block = f'''
+                        ```python
+                        secret_value = dbutils.secrets.get(scope="{selected_scope.value}", key="{secret[0]}")
+                        ```'''
+                        solara.Markdown(code_block)
                         solara.Button(icon_name="mdi-pencil", icon=True, on_click=on_edit_secret)
                         solara.Button(icon_name="mdi-delete", icon=True, on_click=on_delete_secret)
-
-
-# Path("/Users/sri.tikkireddy/PycharmProjects/databricks-secrets-explorer").resolve()
-# Path("/Users/sri.tikkireddy/PycharmProjects/databricks-secrets-explorer").resolve()
 
 
 @solara.component
@@ -331,13 +332,7 @@ def FileBrowser(exec_base_path, exclude_prefixes: List[str] = None):
             if any([str(p).startswith(prefix) for prefix in exclude_prefixes]):
                 return False
             return True
-            # return p.is_dir()
 
-        # reset path and file when can_select changes
-        # solara.use_memo(reset_path)
-
-        # def on_directory_change(p: Path) -> None:
-        #     set_directory(p)
         def protect():
             def check_base_path(value):
                 if not str(value).startswith(str(EXECUTION_BASE_PATH)):
@@ -418,7 +413,7 @@ def FileBrowser(exec_base_path, exclude_prefixes: List[str] = None):
 
 
 @solara.component
-def RootApp():
+def RootPage():
     with solara.AppBar():
         with solara.AppBarTitle():
             solara.Text(f"Databricks UI Extras: v{databricks_ui_extras.__version__}")
@@ -448,3 +443,7 @@ def RootApp():
                     with solara.lab.Tab("Driver User Home"):
                         with solara.Card("Driver User Home File Browser (Double click to navigate)"):
                             FileBrowser(os.path.expanduser("~/"))
+
+
+# Solara local testing
+Page = RootPage

@@ -8,6 +8,7 @@ setup(
     use_scm_version={
         "local_scheme": "node-and-timestamp"
     },
+    packages=find_packages(exclude=['notebooks']),
     setup_requires=['setuptools_scm'],
     install_requires=[
         "databricks-sdk>=0.2.1, <1.0.0",

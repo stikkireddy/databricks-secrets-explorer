@@ -1,7 +1,5 @@
 # Databricks notebook source
 
-# COMMAND ----------
-
 # MAGIC %pip install git+https://github.com/stikkireddy/databricks-ui-extras.git@main
 
 # COMMAND ----------

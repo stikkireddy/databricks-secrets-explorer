@@ -448,6 +448,3 @@ def RootApp():
                     with solara.lab.Tab("Driver User Home"):
                         with solara.Card("Driver User Home File Browser (Double click to navigate)"):
                             FileBrowser(os.path.expanduser("~/"))
-
-
-RootApp()

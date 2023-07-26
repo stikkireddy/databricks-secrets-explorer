@@ -13,11 +13,11 @@ from databricks_ui_extras.app import Page
 from databricks_ui_extras.app import RootPage
 
 
-def wire_dbutils_for_ws_client(mod):
+def wire_dbutils_for_ws_client(mod, passed_globals):
     from databricks.sdk import WorkspaceClient
     from databricks_ui_extras import app
-    dbutils = globals()["dbutils"]
+    _dbutils = passed_globals["dbutils"]
     mod.ws_client = WorkspaceClient(
-        host=dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiUrl().getOrElse(None),
-        token=dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiToken().getOrElse(None)
+        host=_dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiUrl().getOrElse(None),
+        token=_dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiToken().getOrElse(None)
     )

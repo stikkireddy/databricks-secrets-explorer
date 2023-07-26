@@ -18,6 +18,7 @@ print("Working on setting up page")
 
 # COMMAND ----------
 
+# Rerun this cell a few times if widget does not display
 Page()
 
-
+# COMMAND ----------

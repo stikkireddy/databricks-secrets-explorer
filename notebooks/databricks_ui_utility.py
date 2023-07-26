@@ -10,7 +10,7 @@ dbutils.library.restartPython()
 
 from databricks_ui_extras import Page, wire_dbutils_for_ws_client, app
 
-wire_dbutils_for_ws_client(app)
+wire_dbutils_for_ws_client(app, globals())
 
 # COMMAND ----------
 
